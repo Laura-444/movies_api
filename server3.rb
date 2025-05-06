@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'sinatra/base'
 require 'json'
 
@@ -14,7 +13,7 @@ class MovieApp < Sinatra::Base
   end
 
 
-  # Ver una peli por ID
+  # Ver una peliculas por ID
   #curl -v http://localhost:4567/movies/1
   get '/movies/:id' do
     content_type :json
