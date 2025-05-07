@@ -5,24 +5,25 @@ class MovieApp < Sinatra::Base
   @@movies = {}
   @@current_id = 1
 
-  #Ver todas las peliculas
+  # Obtener todas las peliculas
   #curl -v http://localhost:4567/movies
   get '/movies' do
-    content_type :json
+    # status 200
+    # content_type :json
+    # @@movies.values.to_json
+
     [200, { "Content-Type" => "application/json" }, [@@movies.values.to_json]]
   end
 
 
-  # Ver una peliculas por ID
+  # Obtener pelicula por ID
   #curl -v http://localhost:4567/movies/1
   get '/movies/:id' do
-    content_type :json
     movie = @@movies[params[:id].to_i]
 
     if movie
       [200, { "Content-Type" => "application/json" }, [movie.to_json]]
     else
-      status 404
       [404, { "Content-Type" => "application/json" }, [{ error: "Movie not found" }.to_json]]
     end
   end
@@ -31,9 +32,7 @@ class MovieApp < Sinatra::Base
   # Agregar una nueva película
   #curl -v -X POST http://localhost:4567/movies -H "Content-Type: application/json" -d '{"title":"Inception", "year":2010, "type":"science fiction"}'
   #curl -v -X POST http://localhost:4567/movies -H "Content-Type: application/json" -d '{"title":"Nemo", "year":2003, "type":"animation"}'
-
   post '/movies' do
-    content_type :json
     data = JSON.parse(request.body.read)
 
     new_movie = {
@@ -47,33 +46,36 @@ class MovieApp < Sinatra::Base
     @@current_id += 1
 
     [201, { "Content-Type" => "application/json" }, [
-    { message: "Movie '#{new_movie[:title]}' added successfully." }.to_json
-  ]]
+    { message: "Movie '#{new_movie[:title]}' added successfully." }.to_json]]
   end
 
 
-  # Actualizar una película existente
-  #curl -v -X PUT http://localhost:4567/movies/1 -H "Content-Type: application/json" -d '{"title":"Nonexistent Movie", "year":2022, "type":"fantasy"}'
+  # Actualizar una película por ID
+  #curl -v -X PUT http://localhost:4567/movies/1 -H "Content-Type: application/json" -d '{"title":"Matrix", "year":1999, "type": "science fiction"}'
   put '/movies/:id' do
-    content_type :json
     id = params[:id].to_i
     movie = @@movies[id]
 
     if movie
       data = JSON.parse(request.body.read)
-      movie[:title] = data['title'] if data['title']
-      movie[:year] = data['year'] if data['year']
-      movie[:type] = data['type'] if data['type']
+
+      if data['title']
+        movie[:title] = data['title']
+      end
+      if data['year'] 
+        movie[:year] = data['year']
+      end
+      if data['type'] 
+        movie[:type] = data['type']
+      end
 
       @@movies[id] = movie
 
       [200, { "Content-Type" => "application/json" }, [
-        { message: "Movie '#{movie[:title]}' updated successfully." }.to_json
-      ]]
+        { message: "Movie '#{movie[:title]}' updated successfully." }.to_json]]
     else
       [404, { "Content-Type" => "application/json" }, [
-        { error: "Movie not found" }.to_json
-      ]]
+        { error: "Movie not found" }.to_json]]
     end
   end
 
@@ -81,17 +83,15 @@ class MovieApp < Sinatra::Base
   # Eliminar una película por ID
   #curl -v -X DELETE http://localhost:4567/movies/1
   delete '/movies/:id' do
-    content_type :json
     id = params[:id].to_i
+    movie = @@movies[id]
 
     if @@movies.delete(id)
       [200, { "Content-Type" => "application/json" }, [
-        { message: "Movie with ID #{id} deleted successfully." }.to_json
-      ]]
+        { message: "Movie '#{movie[:title]}' with 'ID #{id}', was deleted successfully." }.to_json]]
     else
       [404, { "Content-Type" => "application/json" }, [
-        { error: "Movie not found" }.to_json
-      ]]
+        { error: "Movie not found" }.to_json]]
     end
   end
 end
